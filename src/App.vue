@@ -4,10 +4,24 @@
       <router-link to="/">Home</router-link> |
       <router-link to="/about">About</router-link>
     </div>
-    <router-view/>
+    <router-view />
   </div>
 </template>
+<script>
 
+const {ipcRenderer} = window.require("electron")
+
+export default {
+  mounted() {
+    ipcRenderer.on("goToHome", () => {
+      this.$router.push("/");
+    });
+    ipcRenderer.on("goToAbout", () => {
+      this.$router.push("/about");
+    });
+  },
+};
+</script>
 <style lang="scss">
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;

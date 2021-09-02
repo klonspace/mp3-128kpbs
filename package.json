@@ -2,12 +2,16 @@
   "name": "electron-vue-downloader",
   "version": "0.1.0",
   "private": true,
+  "main": "main.js",
   "scripts": {
-    "serve": "vue-cli-service serve",
+    "start": "concurrently --kill-others \"vue-cli-service build --watch\" \"electron .\"",
+    "dev": "concurrently --kill-others \"vue-cli-service serve\" \"electron .\"",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "node-id3": "^0.2.3",
+    "soundcloud-scraper": "^5.0.2",
     "vue": "^2.6.11",
     "vue-router": "^3.2.0"
   },
@@ -16,6 +20,8 @@
     "@vue/cli-plugin-router": "~4.5.0",
     "@vue/cli-service": "~4.5.0",
     "@vue/eslint-config-standard": "^5.1.2",
+    "concurrently": "^6.2.1",
+    "electron": "^14.0.0",
     "eslint": "^6.7.2",
     "eslint-plugin-import": "^2.20.2",
     "eslint-plugin-node": "^11.1.0",
