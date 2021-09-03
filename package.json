@@ -2,18 +2,27 @@
   "name": "electron-vue-downloader",
   "version": "0.1.0",
   "private": true,
-  "main": "main.js",
   "scripts": {
-    "start": "concurrently --kill-others \"vue-cli-service build --watch\" \"electron .\"",
-    "dev": "concurrently --kill-others \"vue-cli-service serve\" \"electron .\"",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "dev": "concurrently --kill-others \"vue-cli-service serve\" \"electron .\"",
+    "electron:build": "vue-cli-service electron:build",
+    "electron:serve": "vue-cli-service electron:serve",
+    "newdev": "cross-env NODE_ENV=DEV vue-cli-service serve & sleep 5 && electron main.js",
+    "postinstall": "electron-builder install-app-deps",
+    "postuninstall": "electron-builder install-app-deps",
+    "start": "concurrently --kill-others \"vue-cli-service build --watch\" \"electron .\""
   },
+  "main": "background.js",
   "dependencies": {
+    "ffmpeg-static-electron": "^2.0.3",
+    "fluent-ffmpeg": "^2.1.2",
     "node-id3": "^0.2.3",
     "soundcloud-scraper": "^5.0.2",
     "vue": "^2.6.11",
-    "vue-router": "^3.2.0"
+    "vue-router": "^3.2.0",
+    "youtube-dl-exec": "^1.2.5",
+    "ytdl-core": "^4.9.1"
   },
   "devDependencies": {
     "@vue/cli-plugin-eslint": "~4.5.0",
@@ -21,7 +30,10 @@
     "@vue/cli-service": "~4.5.0",
     "@vue/eslint-config-standard": "^5.1.2",
     "concurrently": "^6.2.1",
+    "cross-env": "^7.0.3",
     "electron": "^14.0.0",
+    "electron-devtools-installer": "^3.2.0",
+    "electron-reloader": "^1.2.1",
     "eslint": "^6.7.2",
     "eslint-plugin-import": "^2.20.2",
     "eslint-plugin-node": "^11.1.0",
@@ -31,6 +43,7 @@
     "lint-staged": "^9.5.0",
     "node-sass": "^4.12.0",
     "sass-loader": "^8.0.2",
+    "vue-cli-plugin-electron-builder": "~2.1.1",
     "vue-template-compiler": "^2.6.11"
   },
   "gitHooks": {

@@ -9,18 +9,18 @@
 </template>
 <script>
 
-const {ipcRenderer} = window.require("electron")
+const { ipcRenderer } = window.require('electron')
 
 export default {
-  mounted() {
-    ipcRenderer.on("goToHome", () => {
-      this.$router.push("/");
-    });
-    ipcRenderer.on("goToAbout", () => {
-      this.$router.push("/about");
-    });
-  },
-};
+  mounted () {
+    ipcRenderer.on('goToHome', () => {
+      this.$router.push('/')
+    })
+    ipcRenderer.on('goToAbout', () => {
+      this.$router.push('/about')
+    })
+  }
+}
 </script>
 <style lang="scss">
 #app {
