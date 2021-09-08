@@ -1,19 +1,19 @@
 import { app, Menu, Tray } from 'electron'
-import os from "os"
+import os from 'os'
 const path = require('path')
 // import trayicon from "./icon.jpg"
 
-function createMenu(window) {
+function createMenu (window) {
   let tray = null
-  const imageFolder = path.join(__dirname);
+  const imageFolder = path.join(__dirname)
 
-  let trayImage;
-  const platform = os.platform();
+  let trayImage
+  const platform = os.platform()
   // Determine appropriate icon for platforms
   if (platform === 'darwin' || platform === 'linux') {
-    trayImage = path.join(imageFolder, '/icon.png');
+    trayImage = path.join(imageFolder, '/icon.png')
   } else if (platform === 'win32') {
-    trayImage = path.join(imageFolder, '/icon.ico');
+    trayImage = path.join(imageFolder, '/icon.ico')
   }
 
   tray = new Tray(trayImage)
@@ -25,13 +25,13 @@ function createMenu(window) {
   // ])
   tray.setToolTip('This is my application.')
   // tray.setContextMenu(contextMenu)
-  tray.on("drop-text", function (t) {
+  tray.on('drop-text', function (t) {
     console.log(t)
   })
-  tray.on("drop", function (t) {
+  tray.on('drop', function (t) {
     console.log(t)
   })
-  tray.on("drop-files", function (t) {
+  tray.on('drop-files', function (t) {
     console.log(t)
   })
 
@@ -45,7 +45,7 @@ function createMenu(window) {
       submenu: [
         {
           label: 'Home',
-          click() {
+          click () {
             console.log('Navigate to Home')
             window.webContents.send('goToHome')
           }
@@ -53,14 +53,14 @@ function createMenu(window) {
         },
         {
           label: 'About',
-          click() {
+          click () {
             console.log('Navigate to About')
             window.webContents.send('goToAbout')
           }
         },
         {
           label: 'Exit',
-          click() {
+          click () {
             app.quit()
           }
         }

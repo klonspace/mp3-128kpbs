@@ -5,12 +5,9 @@ import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 
 import createMenu from '@/menu.js'
-import {downloadSong, checkURL} from '@/soundcloud.js'
+import { downloadSong, checkURL } from '@/soundcloud.js'
 
-import store from "./store"
-
-
-
+import store from './store'
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
@@ -19,9 +16,9 @@ protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } }
 ])
 
-var win;
+var win
 
-async function createWindow() {
+async function createWindow () {
   // Create the browser window.
   win = new BrowserWindow({
     width: 800,
@@ -77,8 +74,8 @@ app.on('ready', async () => {
   createWindow()
 })
 
-app.on("second-instance", (event, argv) => {
-  console.log("HERE");
+app.on('second-instance', (event, argv) => {
+  console.log('HERE')
   console.log(argv[argv.length - 1])
   // Someone tried to run a second instance, we should focus our window.
   // if (argv.length >= 2) {
@@ -92,7 +89,7 @@ app.on("second-instance", (event, argv) => {
   //     }
   //     mainWindow.focus();
   // }
-});
+})
 
 // Exit cleanly on request from parent process in development mode.
 if (isDevelopment) {
@@ -114,17 +111,15 @@ ipcMain.on('songURL', (e, data) => {
   addSongToList(data)
 })
 
-
-function addSongToList(url) {
-  console.log(url);
-  checkURL(url).then(function(songInfo) {
+function addSongToList (url) {
+  console.log(url)
+  checkURL(url).then(function (songInfo) {
     songInfo.id = new Date().getTime()
-    store.commit("pushURL", songInfo)
-    win.webContents.send("emptyInput")
-  }).catch(function(error) {
+    store.commit('pushURL', songInfo)
+    win.webContents.send('emptyInput')
+  }).catch(function (error) {
     console.error(error)
-  });
+  })
 }
 
-var songs = [];
-
+var songs = []
