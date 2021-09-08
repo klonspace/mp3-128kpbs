@@ -77,6 +77,23 @@ app.on('ready', async () => {
   createWindow()
 })
 
+app.on("second-instance", (event, argv) => {
+  console.log("HERE");
+  console.log(argv[argv.length - 1])
+  // Someone tried to run a second instance, we should focus our window.
+  // if (argv.length >= 2) {
+  //     const urlPath = encodeURI(`file:///${argv[argv.length - 1]}`);
+  //     openDeepLink(`app://open-image-url?location=${urlPath}`, mainWindow);
+  // }
+
+  // if (mainWindow) {
+  //     if (mainWindow.isMinimized()) {
+  //         mainWindow.restore();
+  //     }
+  //     mainWindow.focus();
+  // }
+});
+
 // Exit cleanly on request from parent process in development mode.
 if (isDevelopment) {
   if (process.platform === 'win32') {
