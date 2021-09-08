@@ -1,0 +1,9 @@
+processus :
+
+paster le lien sc ou yt
+
+l'appli telecharge automatiquement les infos sans devoir appuyer sur enter, puis les rajoute dans une liste.
+
+la tu peux editer les infos si t'as besoin. les infos de base de la track sont aussi affichées si jamais le programme a merdé
+
+quand t'as édité les infos des tracks, tu peux exporter toutes les tracks en une fois vers le dossier de ton choix

@@ -1,4 +1,4 @@
-import { app, Menu } from "electron"
+import { app, Menu } from 'electron'
 
 function createMenu (window) {
   var menu = Menu.buildFromTemplate([
@@ -32,4 +32,4 @@ function createMenu (window) {
   Menu.setApplicationMenu(menu)
 }
 
-export default createMenu;
+export default createMenu

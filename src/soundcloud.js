@@ -1,12 +1,12 @@
 import SoundCloud from 'soundcloud-scraper'
-import fs from "fs"
+import fs from 'fs'
 import NodeID3 from 'node-id3'
 
 import ytdl from 'ytdl-core'
 
 import request from 'request'
 import ffmpeg from 'ffmpeg-static-electron'
-import * as FfmpegCommand from 'fluent-ffmpeg';
+import * as FfmpegCommand from 'fluent-ffmpeg'
 FfmpegCommand.setFfmpegPath(ffmpeg.path)
 
 var keypath = './key.txt'
@@ -41,9 +41,8 @@ function streamToString(stream) {
     stream.on('end', () => resolve(Buffer.concat(chunks)))
   })
 }
-
 function scDownload(url) {
-  client.getSongInfo(url.split("?")[0])
+  client.getSongInfo(url.split('?')[0])
     .then(async song => {
       const stream = await song.downloadProgressive()
       var buf = await streamToString(stream)
@@ -65,24 +64,23 @@ function scDownload(url) {
 
 async function ytDownload(url) {
   var info = await ytdl.getInfo(url)
-  var title = info.videoDetails.title;
+  var title = info.videoDetails.title
   var thumbnail = info.videoDetails.thumbnails[0].url
-  var stream = await ytdl(url);
+  var stream = await ytdl(url)
 
   try {
     await FfmpegCommand(stream)
-      .output("./temp.mp3")
+      .output('./temp.mp3')
       .audioCodec('libmp3lame')
       .audioBitrate(128)
       .format('mp3')
       .on('error', (err) => console.error(err))
       .on('end', () => {
-
-        var buf = fs.readFileSync("./temp.mp3")
+        var buf = fs.readFileSync('./temp.mp3')
         var imgURI = thumbnail
         const tags = {
           title: title,
-          artist: "",
+          artist: '',
           imgURI: imgURI
         }
         if (title.split(' - ').length > 1) {
@@ -95,18 +93,15 @@ async function ytDownload(url) {
       .on('progress', function (progress) {
         console.log(progress)
       }).run()
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
   }
-
 }
 
 function downloadSong(url) {
-  if (url.includes("soundcloud")) {
+  if (url.includes('soundcloud')) {
     scDownload(url)
-  }
-  else if (url.includes("youtube")) {
+  } else if (url.includes('youtube')) {
     ytDownload(url)
   }
 }
@@ -122,7 +117,6 @@ function writeBuffer(path, buffer) {
   fs.open(path, 'w', function (err, fd) {
     if (err) {
       throw new Error('could not open file: ' + err)
-
     }
     fs.write(fd, buffer, 0, buffer.length, null, function (err) {
       if (err) new Error('error writinf file: ' + err)
@@ -134,4 +128,49 @@ function writeBuffer(path, buffer) {
 }
 
 
-export default downloadSong
+async function checkURL(url) {
+  return new Promise(function (resolve, reject) {
+    var info = false;
+    if (url.includes('soundcloud')) {
+      client.getSongInfo(url)
+        .then(song => {
+          var imgURI = song.thumbnail
+          const tags = {
+            title: song.title,
+            artist: song.author.name,
+            imgURI: imgURI,
+            url:url
+          }
+          if (song.title.split(' - ').length > 1) {
+            tags.title = song.title.split(' - ')[1]
+            tags.artist = song.title.split(' - ')[0]
+          }
+          resolve(tags)
+        })
+        .catch(reject);
+    } else if (url.includes('youtube')) {
+      ytdl.getInfo(url).then(song => {
+        var title = song.videoDetails.title
+        var thumbnail = song.videoDetails.thumbnails[0].url
+        const tags = {
+          title: title,
+          artist: '',
+          imgURI: thumbnail,
+          url :url
+        }
+        if (title.split(' - ').length > 1) {
+          tags.title = title.split(' - ')[1]
+          tags.artist = title.split(' - ')[0]
+        }
+        resolve(tags)
+      })
+        .catch(reject);
+    }
+    else {
+      reject("url no good");
+    }
+  })
+
+}
+
+export { downloadSong, checkURL }

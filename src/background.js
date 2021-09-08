@@ -3,19 +3,27 @@
 import { app, protocol, BrowserWindow, ipcMain } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
-const isDevelopment = process.env.NODE_ENV !== 'production'
 
 import createMenu from '@/menu.js'
-import downloadSong from "@/soundcloud.js"
+import {downloadSong, checkURL} from '@/soundcloud.js'
+
+import store from "./store"
+
+
+
+
+const isDevelopment = process.env.NODE_ENV !== 'production'
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } }
 ])
 
+var win;
+
 async function createWindow() {
   // Create the browser window.
-  const win = new BrowserWindow({
+  win = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
@@ -31,7 +39,7 @@ async function createWindow() {
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
     await win.loadURL(process.env.WEBPACK_DEV_SERVER_URL)
-    // if (!process.env.IS_TEST) win.webContents.openDevTools()
+    if (!process.env.IS_TEST) win.webContents.openDevTools()
   } else {
     createProtocol('app')
     // Load the index.html when not in development
@@ -85,5 +93,21 @@ if (isDevelopment) {
 }
 
 ipcMain.on('songURL', (e, data) => {
-  downloadSong(data)
+  // downloadSong(data)
+  addSongToList(data)
 })
+
+
+function addSongToList(url) {
+  console.log(url);
+  checkURL(url).then(function(songInfo) {
+    songInfo.id = new Date().getTime()
+    store.commit("pushURL", songInfo)
+    win.webContents.send("emptyInput")
+  }).catch(function(error) {
+    console.error(error)
+  });
+}
+
+var songs = [];
+

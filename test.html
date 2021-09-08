@@ -1,0 +1,42 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="drag" style="width:400px; height: 400px; background-color: red">
+
+    </div>
+</body>
+
+<script>
+    document.getElementById("drag").addEventListener("dragover", (event) => {
+
+        console.log(event)
+        event.preventDefault()
+
+        console.log("on top")
+    })
+    document.getElementById("drag").addEventListener("dragenter", (event) => {
+        console.log(event)
+        event.preventDefault()
+        console.log("entered")
+    })
+    document.getElementById("drag").addEventListener("drop", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        console.log("dropped")
+        console.log(event)
+
+        for (const f of event.dataTransfer.files) {
+            // Using the path attribute to get absolute file path
+            console.log("File Path of dragged files: ", f.path);
+        }
+    });
+</script>
+
+</html>

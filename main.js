@@ -1,12 +1,10 @@
 const { app, BrowserWindow, ipcMain } = require('electron')
 
-
 var downloadSong = require('./soundcloud.js').func
 
 // try {
 //     require('electron-reloader')(module)
 //   } catch (_) {}
-
 
 let mainWindow
 
