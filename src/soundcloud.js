@@ -13,7 +13,7 @@ var keypath = './key.txt'
 
 var client, key
 
-async function init() {
+async function init () {
   if (fs.existsSync(keypath)) {
     key = fs.readFileSync(keypath)
   } else {
@@ -24,7 +24,7 @@ async function init() {
 }
 init()
 
-async function download(uri, filename) {
+async function download (uri, filename) {
   return new Promise((resolve, reject) => {
     request.head(uri, function (err, res, body) {
       if (err) reject(err)
@@ -33,7 +33,7 @@ async function download(uri, filename) {
   })
 };
 
-function streamToString(stream) {
+function streamToString (stream) {
   const chunks = []
   return new Promise((resolve, reject) => {
     stream.on('data', (chunk) => chunks.push(Buffer.from(chunk)))
@@ -41,7 +41,7 @@ function streamToString(stream) {
     stream.on('end', () => resolve(Buffer.concat(chunks)))
   })
 }
-function scDownload(url) {
+function scDownload (url) {
   client.getSongInfo(url.split('?')[0])
     .then(async song => {
       const stream = await song.downloadProgressive()
@@ -62,7 +62,7 @@ function scDownload(url) {
     .catch(console.error)
 }
 
-async function ytDownload(url) {
+async function ytDownload (url) {
   var info = await ytdl.getInfo(url)
   var title = info.videoDetails.title
   var thumbnail = info.videoDetails.thumbnails[0].url
@@ -98,7 +98,7 @@ async function ytDownload(url) {
   }
 }
 
-function downloadSong(url) {
+function downloadSong (url) {
   if (url.includes('soundcloud')) {
     scDownload(url)
   } else if (url.includes('youtube')) {
@@ -106,14 +106,14 @@ function downloadSong(url) {
   }
 }
 
-function writeFile(tags, songBuffer, filename) {
+function writeFile (tags, songBuffer, filename) {
   NodeID3.write(tags, songBuffer, function (err, buffer) {
     writeBuffer(filename, buffer)
     if (err) console.error(err)
   })
 }
 
-function writeBuffer(path, buffer) {
+function writeBuffer (path, buffer) {
   fs.open(path, 'w', function (err, fd) {
     if (err) {
       throw new Error('could not open file: ' + err)
@@ -127,10 +127,9 @@ function writeBuffer(path, buffer) {
   })
 }
 
-
-async function checkURL(url) {
+async function checkURL (url) {
   return new Promise(function (resolve, reject) {
-    var info = false;
+    var info = false
     if (url.includes('soundcloud')) {
       client.getSongInfo(url)
         .then(song => {
@@ -139,7 +138,7 @@ async function checkURL(url) {
             title: song.title,
             artist: song.author.name,
             imgURI: imgURI,
-            url:url
+            url: url
           }
           if (song.title.split(' - ').length > 1) {
             tags.title = song.title.split(' - ')[1]
@@ -147,7 +146,7 @@ async function checkURL(url) {
           }
           resolve(tags)
         })
-        .catch(reject);
+        .catch(reject)
     } else if (url.includes('youtube')) {
       ytdl.getInfo(url).then(song => {
         var title = song.videoDetails.title
@@ -156,7 +155,7 @@ async function checkURL(url) {
           title: title,
           artist: '',
           imgURI: thumbnail,
-          url :url
+          url: url
         }
         if (title.split(' - ').length > 1) {
           tags.title = title.split(' - ')[1]
@@ -164,13 +163,11 @@ async function checkURL(url) {
         }
         resolve(tags)
       })
-        .catch(reject);
-    }
-    else {
-      reject("url no good");
+        .catch(reject)
+    } else {
+      reject('url no good')
     }
   })
-
 }
 
 export { downloadSong, checkURL }

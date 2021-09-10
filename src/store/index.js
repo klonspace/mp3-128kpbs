@@ -1,37 +1,37 @@
-import Vue from 'vue';
-import Vuex from 'vuex';
+import Vue from 'vue'
+import Vuex from 'vuex'
 // import Store from 'electron-store'
 
-import { createPersistedState, createSharedMutations } from "vuex-electron"
+import { createPersistedState, createSharedMutations } from 'vuex-electron'
 
-Vue.use(Vuex);
+Vue.use(Vuex)
 
 // const persistentStore = new Store();
 
 export default new Vuex.Store({
   state: {
-    songs: [],
+    songs: []
   },
   mutations: {
-    pushURL(state, song) {
-      state['songs'].push(song)
+    pushURL (state, song) {
+      state.songs.push(song)
     },
-    updateInfo(state, info) {
-      state["songs"].forEach(function (song) {
+    updateInfo (state, info) {
+      state.songs.forEach(function (song) {
         if (song.id == info.id) {
-          song[info.param] = info.value;
+          song[info.param] = info.value
         }
       })
     }
   },
   actions: {
-    updateInfo({ state, commit }, info) {
+    updateInfo ({ state, commit }, info) {
       console.log(state)
-      commit("updateInfo", info)
+      commit('updateInfo', info)
     }
   },
   plugins: [
     // createPersistedState(),
     createSharedMutations()
-  ],
-});
+  ]
+})

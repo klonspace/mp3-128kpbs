@@ -7,7 +7,7 @@ module.exports = {
       nodeIntegration: true,
       externals: ['ffmpeg-static-electron'], // 'ffprobe-static' works for ffprobe-static too
       nodeModulesPath: ['../../node_modules', './node_modules'],
-      mainProcessWatch: ['src/soundcloud'],
+      mainProcessWatch: ['src/soundcloud']
     },
     chainWebpackRendererProcess: config => {
       config.plugin('define').tap(args => {

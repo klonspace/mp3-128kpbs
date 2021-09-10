@@ -4,26 +4,26 @@
   </div>
 </template>
 <script>
-const { ipcRenderer } = window.require("electron");
-
 // In renderer process to call actions you need to use `dispatch` or `mapActions`
 // Don't use `commit` because actions fired via `commit` will not be shared between processes
-import store from "@/store/"
+import store from '@/store/'
+
+const { ipcRenderer } = window.require('electron')
 export default {
-    mounted() {
-        ipcRenderer.on("goToHome", () => {
-            this.$router.push("/");
-        });
-        ipcRenderer.on("goToAbout", () => {
-            this.$router.push("/about");
-        });
+  mounted () {
+    ipcRenderer.on('goToHome', () => {
+      this.$router.push('/')
+    })
+    ipcRenderer.on('goToAbout', () => {
+      this.$router.push('/about')
+    })
 
-        ipcRenderer.on("emptyInput", (evt, message) => {
-            document.getElementById("url").value = ""
-        });
-    },
+    ipcRenderer.on('emptyInput', (evt, message) => {
+      document.getElementById('url').value = ''
+    })
+  }
 
-};
+}
 </script>
 <style lang="scss">
 html, body {

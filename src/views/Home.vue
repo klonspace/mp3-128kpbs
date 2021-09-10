@@ -11,7 +11,7 @@
           </div>
           <div class="info" :data-id="song.id">
             Title : <div v-html="song.title" contenteditable="true" data-which="title" @input="updateStore" /> <br>
-            Artist : <div v-html="song.artist" contenteditable="true" data-which="artist" @input="updateStore" /> 
+            Artist : <div v-html="song.artist" contenteditable="true" data-which="artist" @input="updateStore" />
           </div>
         </div>
       </ul>
@@ -22,35 +22,35 @@
 <script>
 // @ is an alias to /src
 
-const { ipcRenderer } = window.require("electron");
+const { ipcRenderer } = window.require('electron')
 
 export default {
-    name: "Home",
-    props: ["songs"],
-    components: {},
-    mounted() {
-        console.log(this.$store);
+  name: 'Home',
+  props: ['songs'],
+  components: {},
+  mounted () {
+    console.log(this.$store)
+  },
+  methods: {
+    test () {
+      console.log('to')
     },
-    methods: {
-        test() {
-          console.log("to")
-        },
-        submitURL() {
-            var url = document.getElementById("url").value;
-            ipcRenderer.send("songURL", url);
-        },
-        updateStore(e) {
-          var params = {
-            id : e.srcElement.parentNode.dataset.id,
-            param : e.srcElement.dataset.which,
-            value : e.srcElement.innerHTML
-          }
-          this.$store.dispatch("updateInfo", params)
+    submitURL () {
+      var url = document.getElementById('url').value
+      ipcRenderer.send('songURL', url)
+    },
+    updateStore (e) {
+      var params = {
+        id: e.srcElement.parentNode.dataset.id,
+        param: e.srcElement.dataset.which,
+        value: e.srcElement.innerHTML
+      }
+      this.$store.dispatch('updateInfo', params)
 
-          console.log(this.$store.state.songs[0])
-        }
-    },
-};
+      console.log(this.$store.state.songs[0])
+    }
+  }
+}
 </script>
 
 <style scoped lang="scss">
