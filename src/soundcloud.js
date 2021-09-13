@@ -1,19 +1,21 @@
 import SoundCloud from 'soundcloud-scraper'
 import fs from 'fs'
 import NodeID3 from 'node-id3'
-
 import ytdl from 'ytdl-core'
-
 import request from 'request'
 import ffmpeg from 'ffmpeg-static-electron'
 import * as FfmpegCommand from 'fluent-ffmpeg'
-FfmpegCommand.setFfmpegPath(ffmpeg.path)
+import store from './store'
+FfmpegCommand.setFfmpegPath(ffmpeg.path.replace(
+  'app.asar',
+  'app.asar.unpacked'
+))
 
 var keypath = './key.txt'
 
 var client, key
 
-async function init () {
+async function init() {
   if (fs.existsSync(keypath)) {
     key = fs.readFileSync(keypath)
   } else {
@@ -24,7 +26,7 @@ async function init () {
 }
 init()
 
-async function download (uri, filename) {
+async function download(uri, filename) {
   return new Promise((resolve, reject) => {
     request.head(uri, function (err, res, body) {
       if (err) reject(err)
@@ -33,7 +35,7 @@ async function download (uri, filename) {
   })
 };
 
-function streamToString (stream) {
+function streamToString(stream) {
   const chunks = []
   return new Promise((resolve, reject) => {
     stream.on('data', (chunk) => chunks.push(Buffer.from(chunk)))
@@ -41,33 +43,38 @@ function streamToString (stream) {
     stream.on('end', () => resolve(Buffer.concat(chunks)))
   })
 }
-function scDownload (url) {
-  client.getSongInfo(url.split('?')[0])
-    .then(async song => {
-      const stream = await song.downloadProgressive()
+async function scDownload(song) {
+  client.getSongInfo(song.url.split('?')[0])
+    .then(async currSong => {
+      const stream = await currSong.downloadProgressive()
       var buf = await streamToString(stream)
       var imgURI = song.thumbnail
       const tags = {
         title: song.title,
-        artist: song.author.name,
+        artist: song.artist,
         imgURI: imgURI
       }
-      if (song.title.split(' - ').length > 1) {
-        tags.title = song.title.split(' - ')[1]
-        tags.artist = song.title.split(' - ')[0]
-      }
-      var filepath = './downloads/' + song.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.mp3'
-      writeFile(tags, buf, filepath)
+      var filepath = store.state.exportFolder + "/" + song.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.mp3'
+      console.log(filepath)
+      writeFile(tags, buf, filepath).then(() => {
+        song.downloadProgress = 1;
+        song.downloadURI = filepath;
+        store.commit("updateProgress", song)
+        store.commit("finishedLoading", song)
+      }).catch(err => {
+        console.log(err)
+      })
+
     })
     .catch(console.error)
 }
 
-async function ytDownload (url) {
-  var info = await ytdl.getInfo(url)
-  var title = info.videoDetails.title
-  var thumbnail = info.videoDetails.thumbnails[0].url
-  var stream = await ytdl(url)
-
+async function ytDownload(song) {
+  var title = song.title
+  var thumbnail = song.url
+  var stream = await ytdl(song.url, {
+    quality: "highestaudio"
+  })
   try {
     await FfmpegCommand(stream)
       .output('./temp.mp3')
@@ -75,59 +82,73 @@ async function ytDownload (url) {
       .audioBitrate(128)
       .format('mp3')
       .on('error', (err) => console.error(err))
-      .on('end', () => {
+      .on('end', async () => {
         var buf = fs.readFileSync('./temp.mp3')
         var imgURI = thumbnail
         const tags = {
-          title: title,
-          artist: '',
-          imgURI: imgURI
+          title: song.title,
+          artist: song.artist,
+          imgURI: song.imgURI
         }
-        if (title.split(' - ').length > 1) {
-          tags.title = title.split(' - ')[1]
-          tags.artist = title.split(' - ')[0]
-        }
-        var filepath = './downloads/' + title.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.mp3'
-        writeFile(tags, buf, filepath)
+        var filepath = store.state.exportFolder + "/" + title.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.mp3'
+        writeFile(tags, buf, filepath).then(() => {
+          song.downloadProgress = 1;
+          song.downloadURI = filepath;
+          store.commit("updateProgress", song)
+          store.commit("finishedLoading", song)
+        }).catch(err => {
+          console.log(err)
+        })
       })
       .on('progress', function (progress) {
-        console.log(progress)
+        var splitTime = progress.timemark.split(":")
+        var prog = (parseFloat(splitTime[1]) * 60 + parseFloat(splitTime[2])) / song.songLength
+        song.downloadProgress = prog;
+        store.commit("updateProgress", song)
       }).run()
   } catch (err) {
     console.log(err)
   }
 }
 
-function downloadSong (url) {
-  if (url.includes('soundcloud')) {
-    scDownload(url)
-  } else if (url.includes('youtube')) {
-    ytDownload(url)
+function downloadSong(song) {
+  if (song.url.includes('soundcloud')) {
+    scDownload(song)
+  } else if (song.url.includes('youtube')) {
+    ytDownload(song)
   }
 }
 
-function writeFile (tags, songBuffer, filename) {
-  NodeID3.write(tags, songBuffer, function (err, buffer) {
-    writeBuffer(filename, buffer)
-    if (err) console.error(err)
-  })
-}
-
-function writeBuffer (path, buffer) {
-  fs.open(path, 'w', function (err, fd) {
-    if (err) {
-      throw new Error('could not open file: ' + err)
-    }
-    fs.write(fd, buffer, 0, buffer.length, null, function (err) {
-      if (err) new Error('error writinf file: ' + err)
-      fs.close(fd, function () {
-        console.log('wrote the file successfully')
+async function writeFile(tags, songBuffer, filename) {
+  return new Promise((resolve, reject) => {
+    NodeID3.write(tags, songBuffer, function (err, buffer) {
+      if (err) reject(err);
+      writeBuffer(filename, buffer).then(() => {
+        resolve()
+      }).catch((err) => {
+        reject(err)
       })
     })
   })
 }
 
-async function checkURL (url) {
+async function writeBuffer(path, buffer) {
+  return new Promise((resolve, reject) => {
+    fs.open(path, 'w', function (err, fd) {
+      if (err) {
+        reject(err)
+      }
+      fs.write(fd, buffer, 0, buffer.length, null, function (err) {
+        if (err) reject(err)
+        fs.close(fd, function () {
+          resolve()
+        })
+      })
+    })
+  });
+}
+
+async function checkURL(url) {
   return new Promise(function (resolve, reject) {
     var info = false
     if (url.includes('soundcloud')) {
@@ -150,12 +171,14 @@ async function checkURL (url) {
     } else if (url.includes('youtube')) {
       ytdl.getInfo(url).then(song => {
         var title = song.videoDetails.title
+        // console.log(song.videoDetails)
         var thumbnail = song.videoDetails.thumbnails[0].url
         const tags = {
           title: title,
           artist: '',
           imgURI: thumbnail,
-          url: url
+          url: url,
+          songLength: song.videoDetails.lengthSeconds
         }
         if (title.split(' - ').length > 1) {
           tags.title = title.split(' - ')[1]
@@ -170,4 +193,23 @@ async function checkURL (url) {
   })
 }
 
-export { downloadSong, checkURL }
+
+async function updateTags(song) {
+  console.log("attempting to update song")
+  var tags = {
+    title: song.title,
+    artist: song.artist,
+    imgURI: song.imgURI
+  }
+  var filepath = store.state.exportFolder + "/" + song.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.mp3'
+
+
+  NodeID3.update(tags, song.downloadURI, function (err, buffer) {
+    if (err) console.log(err)
+    // var filepath = store.state.exportFolder + "/" + song.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.mp3'
+    // if (filepath != song.downloadURI) {
+    //   fs.renameSync(song.downloadURI, filepath);
+    // }
+  })
+}
+export { downloadSong, checkURL, updateTags }

@@ -1,10 +1,10 @@
 'use strict'
 
-import { app, protocol, BrowserWindow, ipcMain } from 'electron'
+import { app, protocol, BrowserWindow, ipcMain, dialog } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 
-import createMenu from '@/menu.js'
+import {createMenu, setOutputFolder} from '@/menu.js'
 import { downloadSong, checkURL } from '@/soundcloud.js'
 
 import store from './store'
@@ -17,8 +17,9 @@ protocol.registerSchemesAsPrivileged([
 ])
 
 var win
+var exportFolder = "";
 
-async function createWindow () {
+async function createWindow() {
   // Create the browser window.
   win = new BrowserWindow({
     width: 800,
@@ -32,16 +33,19 @@ async function createWindow () {
   })
 
   createMenu(win)
-
+  
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
     await win.loadURL(process.env.WEBPACK_DEV_SERVER_URL)
-    if (!process.env.IS_TEST) win.webContents.openDevTools()
+    // if (!process.env.IS_TEST) win.webContents.openDevTools()
+    
   } else {
     createProtocol('app')
     // Load the index.html when not in development
     win.loadURL('app://./index.html')
   }
+  win.webContents.openDevTools()
+  setOutputFolder(win);
 }
 
 // Quit when all windows are closed.
@@ -77,18 +81,6 @@ app.on('ready', async () => {
 app.on('second-instance', (event, argv) => {
   console.log('HERE')
   console.log(argv[argv.length - 1])
-  // Someone tried to run a second instance, we should focus our window.
-  // if (argv.length >= 2) {
-  //     const urlPath = encodeURI(`file:///${argv[argv.length - 1]}`);
-  //     openDeepLink(`app://open-image-url?location=${urlPath}`, mainWindow);
-  // }
-
-  // if (mainWindow) {
-  //     if (mainWindow.isMinimized()) {
-  //         mainWindow.restore();
-  //     }
-  //     mainWindow.focus();
-  // }
 })
 
 // Exit cleanly on request from parent process in development mode.
@@ -111,15 +103,19 @@ ipcMain.on('songURL', (e, data) => {
   addSongToList(data)
 })
 
-function addSongToList (url) {
-  console.log(url)
+function addSongToList(url) {
   checkURL(url).then(function (songInfo) {
     songInfo.id = new Date().getTime()
+    songInfo.downloadProgress = 0;
     store.commit('pushURL', songInfo)
     win.webContents.send('emptyInput')
+    downloadSong(songInfo)
+
   }).catch(function (error) {
     console.error(error)
   })
 }
+
+
 
 var songs = []
