@@ -155,11 +155,17 @@ async function checkURL(url) {
       client.getSongInfo(url)
         .then(song => {
           var imgURI = song.thumbnail
+          console.log(song)
           const tags = {
             title: song.title,
             artist: song.author.name,
             imgURI: imgURI,
-            url: url
+            url: url,
+            originalInfo : {
+              description : song.description,
+              title : song.title,
+              uploader : song.author.name
+            }
           }
           if (song.title.split(' - ').length > 1) {
             tags.title = song.title.split(' - ')[1]
@@ -171,14 +177,22 @@ async function checkURL(url) {
     } else if (url.includes('youtube')) {
       ytdl.getInfo(url).then(song => {
         var title = song.videoDetails.title
-        // console.log(song.videoDetails)
+
+        console.log(song.videoDetails)
+
+        
         var thumbnail = song.videoDetails.thumbnails[0].url
         const tags = {
           title: title,
           artist: '',
           imgURI: thumbnail,
           url: url,
-          songLength: song.videoDetails.lengthSeconds
+          songLength: song.videoDetails.lengthSeconds,
+          originalInfo : {
+            description : song.videoDetails.description,
+            title : title,
+            uploader : song.videoDetails.author.name
+          }
         }
         if (title.split(' - ').length > 1) {
           tags.title = title.split(' - ')[1]
@@ -206,10 +220,6 @@ async function updateTags(song) {
 
   NodeID3.update(tags, song.downloadURI, function (err, buffer) {
     if (err) console.log(err)
-    // var filepath = store.state.exportFolder + "/" + song.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.mp3'
-    // if (filepath != song.downloadURI) {
-    //   fs.renameSync(song.downloadURI, filepath);
-    // }
   })
 }
 export { downloadSong, checkURL, updateTags }

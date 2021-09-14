@@ -4,12 +4,14 @@ import { app, protocol, BrowserWindow, ipcMain, dialog } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 
-import {createMenu, setOutputFolder} from '@/menu.js'
+import { createMenu, setOutputFolder } from '@/menu.js'
 import { downloadSong, checkURL } from '@/soundcloud.js'
 
 import store from './store'
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
+
+import Preferences from "./preferences.js"
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
@@ -18,6 +20,12 @@ protocol.registerSchemesAsPrivileged([
 
 var win
 var exportFolder = "";
+var preferences = new Preferences({
+  configName: "prefs",
+  defaults: {
+    exportFolder: ""
+  }
+})
 
 async function createWindow() {
   // Create the browser window.
@@ -32,20 +40,28 @@ async function createWindow() {
     }
   })
 
+
+
   createMenu(win)
-  
+
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
     await win.loadURL(process.env.WEBPACK_DEV_SERVER_URL)
     // if (!process.env.IS_TEST) win.webContents.openDevTools()
-    
+
   } else {
     createProtocol('app')
     // Load the index.html when not in development
     win.loadURL('app://./index.html')
   }
   win.webContents.openDevTools()
-  setOutputFolder(win);
+  if (!preferences.get("exportFolder")) {
+    setOutputFolder(win, preferences);
+  }
+  else {
+
+    store.commit("setFolder", preferences.get("exportFolder"));
+  }
 }
 
 // Quit when all windows are closed.

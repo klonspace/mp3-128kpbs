@@ -87,7 +87,7 @@ input {
     color: black;
     width: 100%;
     box-sizing: border-box;
-    font-family: "Terminal Grotesque";
+    font-family: "Thermo";
     padding-top: 5px;
 }
 ::placeholder {
@@ -151,7 +151,7 @@ ul {
         font-weight: bold;
     }
     .blockContent {
-        font-family: "Terminal Grotesque";
+        font-family: "Thermo";
     }
 }
 </style>

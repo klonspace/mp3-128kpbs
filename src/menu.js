@@ -5,18 +5,23 @@ const path = require('path')
 
 
 import store from './store'
-function setOutputFolder(win) {
+function setOutputFolder(win, prefs) {
   dialog.showOpenDialog(win, {
     properties: ['openFile', 'openDirectory']
   }).then(result => {
+    console.log(result.filePaths)
     if (!result.canceled) {
       store.commit("setFolder", result.filePaths);
+      prefs.set("exportFolder", result.filePaths);
+    }
+    else {
+      setOutputFolder(win, prefs);
     }
   }).catch(err => {
     console.log(err)
   })
 }
-function createMenu(window) {
+function createMenu(window, prefs) {
 
 
   var menu = Menu.buildFromTemplate([
@@ -26,7 +31,7 @@ function createMenu(window) {
         {
           label: 'Set output folder...',
           click() {
-            setOutputFolder(window)
+            setOutputFolder(window, prefs)
           }
 
         },
