@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <input type="text" id="url" @input="submitURL" placeholder="DROP/PASTE URL"><br>
+    <input type="text" id="url" @input="submitURL" :placeholder="placeholder"><br>
     <!-- <input type="button" value="submit" @click="submitURL"> -->
     <div class="songlist">
       <ul>
@@ -41,117 +41,149 @@
 
 const { ipcRenderer } = window.require("electron");
 
-import ffmpeg from 'ffmpeg-static-electron'
+import ffmpeg from "ffmpeg-static-electron";
 
-console.log(ffmpeg.path)
+console.log(ffmpeg.path);
 export default {
-    name: "Home",
-    props: ["songs"],
-    components: {},
-    mounted() {
-        console.log(this.$store.state);
+  name: "Home",
+  props: ["songs"],
+  components: {},
+  data() {
+    return {
+      checkingURL: false,
+      checkingURLString: "loading",
+      lastErrorTime: 0,
+    };
+  },
+  mounted() {
+    console.log(this.$store.state);
+    ipcRenderer.on("emptyInput", (evt, message) => {
+      document.getElementById("url").value = "";
+    });
+    ipcRenderer.on('errorWithInput', (evt, message) => {
+      document.getElementById('url').value = ''
+      this.lastErrorTime = new Date().getTime()
+    })
+    this.stringAnim();
+  },
+  computed: {
+    placeholder() {
+      if (this.checkingURL) {
+        return this.checkingURLString;
+      } else if (new Date().getTime() - this.lastErrorTime < 1000) {
+        return "Error with URL";
+      } else {
+        return "DROP/PASTE URL";
+      }
     },
-    methods: {
-        test() {
-            console.log("to");
-        },
-        submitURL() {
-            var url = document.getElementById("url").value;
-            ipcRenderer.send("songURL", url);
-        },
-        updateStore(e) {
-            var params = {
-                id: e.srcElement.parentNode.parentNode.parentNode.dataset.id,
-                param: e.srcElement.dataset.which,
-                value: e.srcElement.innerHTML,
-            };
-            this.$store.dispatch("updateInfo", params);
-        },
-        loaded(progress) {
-            console.log(progress);
-            return {
-                width: progress * 100 + "%",
-            };
-        },
+  },
+  methods: {
+    test() {
+      console.log("to");
     },
+    submitURL() {
+      var url = document.getElementById("url").value;
+      ipcRenderer.send("songURL", url);
+      this.checkingURL = true;
+    },
+    updateStore(e) {
+      var params = {
+        id: e.srcElement.parentNode.parentNode.parentNode.dataset.id,
+        param: e.srcElement.dataset.which,
+        value: e.srcElement.innerHTML,
+      };
+      this.$store.dispatch("updateInfo", params);
+    },
+    loaded(progress) {
+      console.log(progress);
+      return {
+        width: progress * 100 + "%",
+      };
+    },
+    stringAnim() {
+      this.checkingURLString =
+        this.checkingURLString.substring(1) + this.checkingURLString.charAt(0);
+      setTimeout(this.stringAnim, 200);
+    },
+  },
 };
 </script>
 
 <style scoped lang="scss">
 input {
-    text-align: center;
-    font-size: 40px;
-    border-radius: 0px;
-    border: 1px solid black;
-    background-color: #fff;
-    color: black;
-    width: 100%;
-    box-sizing: border-box;
-    font-family: "Thermo";
-    padding-top: 5px;
+  text-align: center;
+  font-size: 40px;
+  border-radius: 0px;
+  border: 1px solid black;
+  background-color: #fff;
+  color: black;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: "Thermo";
+  padding-top: 5px;
 }
 ::placeholder {
-    /* Chrome, Firefox, Opera, Safari 10.1+ */
-    color: black;
-    opacity: 1; /* Firefox */
+  /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: black;
+  opacity: 1; /* Firefox */
 }
 ul {
-    list-style: none;
-    margin-left: 0px;
-    padding-left: 0px;
+  list-style: none;
+  margin-left: 0px;
+  padding-left: 0px;
 }
 .song {
-    display: flex;
-    margin-bottom: 10px;
-    font-size: 30px;
-    text-align: left;
+  display: flex;
+  margin-bottom: 10px;
+  font-size: 30px;
+  text-align: left;
 
-    .imgContainer {
-        position: relative;
-        width: 100px;
-        height: 100px;
-        flex-basis: 100px;
-        flex-shrink: 0;
-        margin-right: 10px;
-        flex-grow: 0;
-        img {
-            position: absolute;
-            top: 0px;
-            object-fit: cover;
-            width: 100%;
-            height: 100%;
-        }
+  .imgContainer {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    flex-basis: 100px;
+    flex-shrink: 0;
+    margin-right: 10px;
+    flex-grow: 0;
+    img {
+      position: absolute;
+      top: 0px;
+      object-fit: cover;
+      width: 100%;
+      height: 100%;
     }
+  }
 }
 .loadingBar {
-    width: 100%;
-    height: 3px;
-    background-color: white;
-    margin-bottom: 1em;
-    .loadedPart {
-        background-color: grey;
-        height: 100%;
-    }
+  width: 100%;
+  height: 3px;
+  background-color: white;
+  margin-bottom: 1em;
+  .loadedPart {
+    background-color: grey;
+    height: 100%;
+  }
 }
 .textBlocks {
-    display: flex;
-    flex-grow: 1;
+  display: flex;
+  flex-grow: 1;
 }
 .block {
-    font-size: 30px;
-    margin-right: 10px;
-    width: calc(50% - 5px);
-    overflow: hidden;
-    &:last-of-type {
-        margin-right: 0px;
-    }
-    .blockTitle {
-        font-size: 30%;
-        margin-bottom: 1em;
-        font-weight: bold;
-    }
-    .blockContent {
-        font-family: "Thermo";
-    }
+  font-size: 30px;
+  margin-right: 10px;
+  width: calc(50% - 5px);
+  overflow: hidden;
+  &:last-of-type {
+    margin-right: 0px;
+  }
+  .blockTitle {
+    font-size: 30%;
+    margin-bottom: 1em;
+    font-weight: bold;
+  }
+  .blockContent {
+    font-family: "Thermo";
+  }
 }
 </style>

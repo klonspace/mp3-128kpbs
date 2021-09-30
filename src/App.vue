@@ -17,10 +17,7 @@ export default {
     ipcRenderer.on('goToAbout', () => {
       this.$router.push('/about')
     })
-
-    ipcRenderer.on('emptyInput', (evt, message) => {
-      document.getElementById('url').value = ''
-    })
+    
   }
 
 }
