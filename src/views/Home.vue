@@ -1,64 +1,61 @@
 <template>
   <div class="home">
-    <<<<<<< HEAD <input type="text" id="url" @input="submitURL" :placeholder="placeholder"><br>
-      =======
-      <div class="inputContainer">
-        <input type="text" id="url" @input="submitURL">
-        <div class="overlay">DROP/PASTE<br>URL</div>
-      </div>
-      >>>>>>> 605d6577f378f5b8d865f8d8cc4ccbdd3596cf91
-      <!-- <input type="button" value="submit" @click="submitURL"> -->
-      <div class="songlist">
-        <ul>
-          <div v-for="(song, i) in $store.state.songs" :key="song.url+i">
-            <div :data-id="song.id" class="song">
-              <div class="imgContainer">
-                <img :src="song.imgURI">
-              </div>
-              <div class="textPartContainer">
-                <div class="textBlocks">
-                  <div class="block">
-                    <div class="blockTitle">
-                      ARTIST
-                    </div>
-                    <div v-html="song.artist" contenteditable="true" data-which="artist" @blur="updateStore" @paste="specialPaste" class="blockContent" />
-                  </div>
-                  <div class="block">
-                    <div class="blockTitle">
-                      TRACK
-                    </div>
-                    <div v-html="song.title" contenteditable="true" data-which="title" @blur="updateStore" @paste="specialPaste" class="blockContent" />
-                  </div>
-                </div>
-                <div class="morebutton">
-                  <div @click="openSong(i)" v-html="openStatus(i)?'- Less Info':'+ More Info'" />
-                </div>
-                <div class="info" v-if="openStatus(i)">
-                  <div>
-                    Original Title :
-                    <div v-html="song.originalInfo.title" />
-                  </div>
-                  <div>
-                    Uploader Name :
-                    <div v-html="song.originalInfo.uploader" />
-                  </div>
-                  <div>
-                    Description :
-                    <div v-html="song.originalInfo.description" />
-                  </div>
-                </div>
-
-              </div>
+    <div class="inputContainer">
+      <input type="text" id="url" @input="submitURL">
+      <div class="overlay" v-html="placeholder" :class="{'error' : errorWithURL}"></div>
+    </div>
+    <!-- <input type="button" value="submit" @click="submitURL"> -->
+    <div class="songlist">
+      <ul>
+        <div v-for="(song, i) in $store.state.songs" :key="song.url+i">
+          <div :data-id="song.id" class="song">
+            <div class="imgContainer">
+              <img :src="song.imgURI">
             </div>
-
-            <div class="loadingBar">
-              <div class="loadedPart" :style="loaded(song.downloadProgress)">
-
+            <div class="textPartContainer">
+              <div class="textBlocks">
+                <div class="block">
+                  <div class="blockTitle">
+                    ARTIST
+                  </div>
+                  <div v-html="song.artist" contenteditable="true" data-which="artist" @blur="updateStore" @paste="specialPaste" class="blockContent" />
+                </div>
+                <div class="block">
+                  <div class="blockTitle">
+                    TRACK
+                  </div>
+                  <div v-html="song.title" contenteditable="true" data-which="title" @blur="updateStore" @paste="specialPaste" class="blockContent" />
+                </div>
               </div>
+              <div class="morebutton">
+                <div @click="openSong(i)" v-html="openStatus(i)?'- Less Info':'+ More Info'" />
+              </div>
+              <div class="info" v-if="openStatus(i)">
+                <div>
+                  Original Title :
+                  <div v-html="song.originalInfo.title" />
+                </div>
+                <div>
+                  Uploader Name :
+                  <div v-html="song.originalInfo.uploader" />
+                </div>
+                <div>
+                  Description :
+                  <div v-html="song.originalInfo.description" />
+                </div>
+              </div>
+
             </div>
           </div>
-        </ul>
-      </div>
+
+          <div class="loadingBar">
+            <div class="loadedPart" :style="loaded(song.downloadProgress)">
+
+            </div>
+          </div>
+        </div>
+      </ul>
+    </div>
   </div>
 </template>
 
@@ -78,18 +75,26 @@ export default {
     return {
       checkingURL: false,
       checkingURLString: "loading",
-      lastErrorTime: 0,
-      selected : -1
+      errorWithURL: false,
+      selected: -1,
     };
   },
   mounted() {
     console.log(this.$store.state);
     ipcRenderer.on("emptyInput", (evt, message) => {
       document.getElementById("url").value = "";
+      this.checkingURL = false;
+      document.getElementById("url").disabled = false;
     });
     ipcRenderer.on("errorWithInput", (evt, message) => {
       document.getElementById("url").value = "";
       this.lastErrorTime = new Date().getTime();
+      this.checkingURL = false;
+      this.errorWithURL = true;
+      setTimeout(() => {
+        this.errorWithURL = false;
+        document.getElementById("url").disabled = false;
+      }, 1000);
     });
     this.stringAnim();
   },
@@ -97,10 +102,10 @@ export default {
     placeholder() {
       if (this.checkingURL) {
         return this.checkingURLString;
-      } else if (new Date().getTime() - this.lastErrorTime < 1000) {
+      } else if (this.errorWithURL) {
         return "Error with URL";
       } else {
-        return "DROP/PASTE URL";
+        return "DROP/PASTE<br>URL";
       }
     },
   },
@@ -110,6 +115,8 @@ export default {
     },
     submitURL() {
       var url = document.getElementById("url").value;
+      document.getElementById("url").value = "";
+      document.getElementById("url").disabled = true;
       ipcRenderer.send("songURL", url);
       this.checkingURL = true;
     },
@@ -154,33 +161,36 @@ export default {
 
 <style scoped lang="scss">
 .inputContainer {
-    .overlay {
-        position: absolute;
-        top: 15px;
-        left: 0px;
-        width: 100%;
-        pointer-events: none;
-        font-family: "Thermo";
-        font-size: 30px;
+  .overlay {
+    position: absolute;
+    top: 15px;
+    left: 0px;
+    width: 100%;
+    pointer-events: none;
+    font-family: "Thermo";
+    font-size: 30px;
+    &.error {
+      color: red;
     }
-    input {
-        text-align: center;
-        font-size: 40px;
-        border-radius: 0px;
-        border: 1px solid black;
-        background-color: #fff;
-        color: black;
-        width: 100%;
-        box-sizing: border-box;
-        font-family: "Thermo";
-        padding-top: 5px;
-        height: 70px;
-    }
+  }
+  input {
+    text-align: center;
+    font-size: 40px;
+    border-radius: 0px;
+    border: 1px solid black;
+    background-color: #fff;
+    color: black;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: "Thermo";
+    padding-top: 5px;
+    height: 70px;
+  }
 }
 ::placeholder {
-    /* Chrome, Firefox, Opera, Safari 10.1+ */
-    color: grey;
-    opacity: 1; /* Firefox */
+  /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: grey;
+  opacity: 1; /* Firefox */
 }
 ul {
   list-style: none;
@@ -221,47 +231,47 @@ ul {
   }
 }
 .textPartContainer {
-    overflow: hidden;
-    position: relative;
-    width: 100%;
-    // max-height: 100px;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+  // max-height: 100px;
 }
 .textBlocks {
-    width: 100%;
-    display: flex;
+  width: 100%;
+  display: flex;
 }
 .block {
-    font-size: 30px;
-    margin-right: 10px;
-    width: calc(50% - 5px);
-    overflow: hidden;
-    &:last-of-type {
-        margin-right: 0px;
-    }
-    .blockTitle {
-        font-size: 30%;
-        margin-bottom: 1em;
-        font-weight: bold;
-    }
-    .blockContent {
-        font-family: "Thermo";
-        border: 1px solid #ddd;
-        color: black !important;
-    }
+  font-size: 30px;
+  margin-right: 10px;
+  width: calc(50% - 5px);
+  overflow: hidden;
+  &:last-of-type {
+    margin-right: 0px;
+  }
+  .blockTitle {
+    font-size: 30%;
+    margin-bottom: 1em;
+    font-weight: bold;
+  }
+  .blockContent {
+    font-family: "Thermo";
+    border: 1px solid #ddd;
+    color: black !important;
+  }
 }
 .morebutton {
-    font-family: "Thermo";
-    cursor: pointer;
+  font-family: "Thermo";
+  cursor: pointer;
 }
 
 .info {
-    font-size: 50%;
-    font-family: "Thermo";
-    color: #f00;
-    padding-top: 20px;
-    & > div > div {
-        margin: 10px 0px;
-        font-size: 200%;
-    }
+  font-size: 50%;
+  font-family: "Thermo";
+  color: #f00;
+  padding-top: 20px;
+  & > div > div {
+    margin: 10px 0px;
+    font-size: 200%;
+  }
 }
 </style>

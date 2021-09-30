@@ -129,6 +129,7 @@ function addSongToList(url) {
 
   }).catch(function (error) {
     console.error(error)
+    win.webContents.send('errorWithInput')
   })
 }
 
