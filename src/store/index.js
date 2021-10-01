@@ -23,9 +23,11 @@ export default new Vuex.Store({
       state.songs.push(song)
     },
     updateInfo (state, info) {
-      console.log("updating info")
+      console.log(info)
       state.songs.forEach(function (song) {
+
         if (song.id == info.id) {
+          console.log("found song")
           song[info.param] = info.value
           if(song.hasOwnProperty("downloadURI")) {
             updateTags(song)
@@ -52,7 +54,6 @@ export default new Vuex.Store({
   },
   actions: {
     updateInfo ({ state, commit }, info) {
-      console.log("asknkjasf")
       commit('updateInfo', info)
     }
   },

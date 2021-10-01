@@ -6,6 +6,8 @@ import request from 'request'
 import ffmpeg from 'ffmpeg-static-electron'
 import * as FfmpegCommand from 'fluent-ffmpeg'
 import store from './store'
+
+import { v4 as uuidv4 } from 'uuid';
 FfmpegCommand.setFfmpegPath(ffmpeg.path.replace(
   'app.asar',
   'app.asar.unpacked'
@@ -75,15 +77,16 @@ async function ytDownload(song) {
   var stream = await ytdl(song.url, {
     quality: "highestaudio"
   })
+  var tempFileName = './downloads/'+uuidv4()+'.mp3';
   try {
     await FfmpegCommand(stream)
-      .output('./temp.mp3')
+      .output(tempFileName)
       .audioCodec('libmp3lame')
       .audioBitrate(128)
       .format('mp3')
       .on('error', (err) => console.error(err))
       .on('end', async () => {
-        var buf = fs.readFileSync('./temp.mp3')
+        var buf = fs.readFileSync(tempFileName)
         var imgURI = thumbnail
         const tags = {
           title: song.title,
@@ -96,6 +99,7 @@ async function ytDownload(song) {
           song.downloadURI = filepath;
           store.commit("updateProgress", song)
           store.commit("finishedLoading", song)
+          fs.unlinkSync(tempFileName)
         }).catch(err => {
           console.log(err)
         })
@@ -216,7 +220,7 @@ async function updateTags(song) {
     imgURI: song.imgURI
   }
   var filepath = store.state.exportFolder + "/" + song.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.mp3'
-
+  console.log(tags, song)
 
   NodeID3.update(tags, song.downloadURI, function (err, buffer) {
     if (err) console.log(err)
