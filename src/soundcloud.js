@@ -77,7 +77,14 @@ async function ytDownload(song) {
   var stream = await ytdl(song.url, {
     quality: "highestaudio"
   })
-  var tempFileName = './downloads/'+uuidv4()+'.mp3';
+  var tempFileName = './downloads/' + uuidv4() + '.mp3';
+  try {
+    if (!fs.existsSync("./downloads")) {
+      fs.mkdirSync("./downloads")
+    }
+  } catch (e) {
+    console.log("An error occurred.")
+  }
   try {
     await FfmpegCommand(stream)
       .output(tempFileName)
@@ -165,10 +172,10 @@ async function checkURL(url) {
             artist: song.author.name,
             imgURI: imgURI,
             url: url,
-            originalInfo : {
-              description : song.description,
-              title : song.title,
-              uploader : song.author.name
+            originalInfo: {
+              description: song.description,
+              title: song.title,
+              uploader: song.author.name
             }
           }
           if (song.title.split(' - ').length > 1) {
@@ -184,7 +191,7 @@ async function checkURL(url) {
 
         console.log(song.videoDetails)
 
-        
+
         var thumbnail = song.videoDetails.thumbnails[0].url
         const tags = {
           title: title,
@@ -192,10 +199,10 @@ async function checkURL(url) {
           imgURI: thumbnail,
           url: url,
           songLength: song.videoDetails.lengthSeconds,
-          originalInfo : {
-            description : song.videoDetails.description,
-            title : title,
-            uploader : song.videoDetails.author.name
+          originalInfo: {
+            description: song.videoDetails.description,
+            title: title,
+            uploader: song.videoDetails.author.name
           }
         }
         if (title.split(' - ').length > 1) {
