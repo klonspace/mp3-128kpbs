@@ -8,16 +8,19 @@ import * as FfmpegCommand from 'fluent-ffmpeg'
 import store from './store'
 
 import { v4 as uuidv4 } from 'uuid';
+import electron  from 'electron';
+import path  from 'path';
 FfmpegCommand.setFfmpegPath(ffmpeg.path.replace(
   'app.asar',
   'app.asar.unpacked'
 ))
-
-var keypath = './key.txt'
-
+var userDataPath, keypath;
 var client, key
 
-async function init() {
+async function initSC(app) {
+  userDataPath = app.getPath('userData');
+    // We'll use the `configName` property to set the file name and path.join to bring it all together as a string
+keypath = path.join(userDataPath, "key.txt");
   if (fs.existsSync(keypath)) {
     key = fs.readFileSync(keypath)
   } else {
@@ -26,7 +29,6 @@ async function init() {
   }
   client = new SoundCloud.Client(key)
 }
-init()
 
 async function download(uri, filename) {
   return new Promise((resolve, reject) => {
@@ -77,7 +79,8 @@ async function ytDownload(song) {
   var stream = await ytdl(song.url, {
     quality: "highestaudio"
   })
-  var tempFileName = './downloads/' + uuidv4() + '.mp3';
+  //var tempFileName = './downloads/' + uuidv4() + '.mp3';
+  var tempFileName = path.join(userDataPath, uuidv4() + '.mp3');
   try {
     if (!fs.existsSync("./downloads")) {
       fs.mkdirSync("./downloads")
@@ -233,4 +236,4 @@ async function updateTags(song) {
     if (err) console.log(err)
   })
 }
-export { downloadSong, checkURL, updateTags }
+export { downloadSong, checkURL, updateTags, initSC }
