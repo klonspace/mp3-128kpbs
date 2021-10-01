@@ -122,7 +122,7 @@ export default {
     },
     updateStore(e) {
       var params = {
-        id: e.srcElement.parentNode.parentNode.parentNode.dataset.id,
+        id: e.srcElement.parentNode.parentNode.parentNode.parentNode.dataset.id,
         param: e.srcElement.dataset.which,
         value: e.srcElement.innerHTML,
       };

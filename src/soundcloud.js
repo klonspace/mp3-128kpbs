@@ -216,7 +216,7 @@ async function updateTags(song) {
     imgURI: song.imgURI
   }
   var filepath = store.state.exportFolder + "/" + song.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.mp3'
-
+  console.log(tags, song)
 
   NodeID3.update(tags, song.downloadURI, function (err, buffer) {
     if (err) console.log(err)
