@@ -55,7 +55,7 @@ async function createWindow() {
     // Load the index.html when not in development
     win.loadURL('app://./index.html')
   }
-  //win.webContents.openDevTools()
+  win.webContents.openDevTools()
   if (!preferences.get("exportFolder")) {
     setOutputFolder(win, preferences);
   }
@@ -131,6 +131,7 @@ function addSongToList(url) {
   checkURL(url).then(function (songInfo) {
     songInfo.id = new Date().getTime()
     songInfo.downloadProgress = 0;
+    songInfo.smoothProgress  = 0;
     store.commit('pushURL', songInfo)
     win.webContents.send('emptyInput')
     downloadSong(songInfo)

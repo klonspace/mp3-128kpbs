@@ -166,7 +166,7 @@ async function checkURL(url) {
   return new Promise(function (resolve, reject) {
     var info = false
     if (url.includes('soundcloud')) {
-      client.getSongInfo(url)
+      client.getSongInfo(url.split('?')[0])
         .then(song => {
           var imgURI = song.thumbnail
           console.log(song)
@@ -176,14 +176,14 @@ async function checkURL(url) {
             imgURI: imgURI,
             url: url,
             originalInfo: {
-              description: song.description,
-              title: song.title,
-              uploader: song.author.name
+              description: song.description.normalize(),
+              title: song.title.normalize(),
+              uploader: song.author.name.normalize()
             }
           }
           if (song.title.split(' - ').length > 1) {
-            tags.title = song.title.split(' - ')[1]
-            tags.artist = song.title.split(' - ')[0]
+            tags.title = song.title.split(' - ')[1].normalize()
+            tags.artist = song.title.split(' - ')[0].normalize()
           }
           resolve(tags)
         })

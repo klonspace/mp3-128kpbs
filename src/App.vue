@@ -25,6 +25,10 @@ export default {
 <style lang="scss">
 html, body {
     background-color: white;
+    // font-size: 20px;
+    padding: 0px;
+    margin: 0px;
+    
 }
 #app {
     font-family: Avenir, Helvetica, Arial, sans-serif;
@@ -32,6 +36,7 @@ html, body {
     -moz-osx-font-smoothing: grayscale;
     text-align: center;
     background-color: white;
+    padding: 10px;
 }
 
 #nav {
