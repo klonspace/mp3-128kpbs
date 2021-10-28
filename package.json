@@ -19,6 +19,7 @@
     "ffmpeg-static": "^4.4.0",
     "ffmpeg-static-electron": "^2.0.3",
     "fluent-ffmpeg": "^2.1.2",
+    "node-fetch": "^3.0.0",
     "node-id3": "^0.2.3",
     "soundcloud-scraper": "^5.0.2",
     "uuid": "^8.3.2",

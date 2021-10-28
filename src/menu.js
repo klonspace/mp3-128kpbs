@@ -6,8 +6,10 @@ const path = require('path')
 
 import store from './store'
 function setOutputFolder(win, prefs) {
+  console.log(prefs)
   dialog.showOpenDialog(win, {
-    properties: ['openFile', 'openDirectory']
+    properties: ['openFile', 'openDirectory'],
+    title : "Please select where you would like to save downloaded files. This can be changed later."
   }).then(result => {
     console.log(result.filePaths)
     if (!result.canceled) {

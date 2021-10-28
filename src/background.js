@@ -30,9 +30,9 @@ var preferences = new Preferences({
 async function createWindow() {
   // Create the browser window.
   win = new BrowserWindow({
-    width: 350,
+    width: 450,
     height: 600,
-    title: "YouCloud + SoundTube DownLoader",
+    title: "MP3 128 KBPS",
     webPreferences: {
       nodeIntegration: true,
       nodeIntegrationInWorker: true,
@@ -43,7 +43,7 @@ async function createWindow() {
 
 
 
-  createMenu(win)
+  createMenu(win, preferences)
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
@@ -55,7 +55,7 @@ async function createWindow() {
     // Load the index.html when not in development
     win.loadURL('app://./index.html')
   }
-  win.webContents.openDevTools()
+  // win.webContents.openDevTools()
   if (!preferences.get("exportFolder")) {
     setOutputFolder(win, preferences);
   }

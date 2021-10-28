@@ -8,19 +8,20 @@ import * as FfmpegCommand from 'fluent-ffmpeg'
 import store from './store'
 
 import { v4 as uuidv4 } from 'uuid';
-import electron  from 'electron';
-import path  from 'path';
+import electron from 'electron';
+import path from 'path';
 FfmpegCommand.setFfmpegPath(ffmpeg.path.replace(
   'app.asar',
   'app.asar.unpacked'
 ))
+const https = require('https')
 var userDataPath, keypath;
 var client, key
 
 async function initSC(app) {
   userDataPath = app.getPath('userData');
-    // We'll use the `configName` property to set the file name and path.join to bring it all together as a string
-keypath = path.join(userDataPath, "key.txt");
+  // We'll use the `configName` property to set the file name and path.join to bring it all together as a string
+  keypath = path.join(userDataPath, "key.txt");
   if (fs.existsSync(keypath)) {
     key = fs.readFileSync(keypath)
   } else {
@@ -162,12 +163,38 @@ async function writeBuffer(path, buffer) {
   });
 }
 
+async function getSCDesc(url) {
+  return new Promise((resolve, reject) => {
+    https.get(url, (resp) => {
+      let data = '';
+  
+      // A chunk of data has been received.
+      resp.on('data', (chunk) => {
+        data += chunk;
+      });
+  
+      // The whole response has been received. Print out the result.
+      resp.on('end', () => {
+        // console.log(data);
+        var db = JSON.parse(data.split("window.__sc_hydration = ")[1].split(";</script>")[0])
+        var info = db.filter(entry => entry.hydratable == "sound")[0];
+        resolve(info.data.description)
+      });
+  
+    }).on("error", (err) => {
+      reject(err.message);
+    });
+  })
+  
+}
+
 async function checkURL(url) {
   return new Promise(function (resolve, reject) {
     var info = false
     if (url.includes('soundcloud')) {
       client.getSongInfo(url.split('?')[0])
-        .then(song => {
+        .then(async song =>  {
+          var desc = await getSCDesc(url)
           var imgURI = song.thumbnail
           console.log(song)
           const tags = {
@@ -176,7 +203,7 @@ async function checkURL(url) {
             imgURI: imgURI,
             url: url,
             originalInfo: {
-              description: song.description.normalize(),
+              description: desc.normalize().replace(/(?:\r\n|\r|\n)/g, '<br>'),
               title: song.title.normalize(),
               uploader: song.author.name.normalize()
             }

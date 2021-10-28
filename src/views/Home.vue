@@ -106,19 +106,6 @@ export default {
             return this.$store.state.songs.length;
         },
     },
-    watch: {
-        numTracks(newN, oldN) {
-            
-            requestAnimationFrame(() => {
-                document
-                    .querySelectorAll(".textBlocks")
-                    [newN - 1].querySelectorAll(".blockContent")
-                    .forEach((el) => {
-                        this.checkTextInput(el);
-                    });
-            })
-        },
-    },
     methods: {
         progressSmooth() {
             requestAnimationFrame(this.progressSmooth)
@@ -135,7 +122,6 @@ export default {
             this.checkingURL = true;
         },
         preventEnter(e) {
-            this.checkTextInput(e.srcElement);
             if (e.keyCode == 13) e.preventDefault();
             return e.keyCode != 13;
         },
@@ -172,20 +158,6 @@ export default {
             e.preventDefault();
             var text = e.clipboardData.getData("text/plain").replace(/\n/g, " ");
             document.execCommand("insertText", false, text);
-        },
-        checkTextInput(input) {
-            if (input.dataset.fontsize == 1) {
-                if (input.getBoundingClientRect().height > 68) {
-                    input.dataset.fontsize = 0;
-                    input.classList.add("smallerFont")
-                }
-            } else {
-                if (input.getBoundingClientRect().height < 40) {
-                    input.dataset.fontsize = 1;
-                    input.classList.remove("smallerFont")
-                }
-            }
-            console.log(input.getBoundingClientRect().height);
         },
     },
 };
@@ -328,8 +300,6 @@ ul {
         color: black;
         margin-top: 18px;
         display: block;
-    }
-    .blockContent.smallerFont {
         font-size: 25px;
         line-height: 23px;
     }
