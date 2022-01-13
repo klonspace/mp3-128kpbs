@@ -21,13 +21,7 @@ var client, key
 async function initSC(app) {
   userDataPath = app.getPath('userData');
   // We'll use the `configName` property to set the file name and path.join to bring it all together as a string
-  keypath = path.join(userDataPath, "key.txt");
-  if (fs.existsSync(keypath)) {
-    key = fs.readFileSync(keypath)
-  } else {
-    key = await SoundCloud.keygen()
-    fs.writeFileSync(keypath, key)
-  }
+  key = await SoundCloud.keygen()
   client = new SoundCloud.Client(key)
 }
 
@@ -203,7 +197,7 @@ async function checkURL(url) {
             imgURI: imgURI,
             url: url,
             originalInfo: {
-              description: desc.normalize().replace(/(?:\r\n|\r|\n)/g, '<br>'),
+              description: desc?desc.normalize().replace(/(?:\r\n|\r|\n)/g, '<br>'):"",
               title: song.title.normalize(),
               uploader: song.author.name.normalize()
             }
