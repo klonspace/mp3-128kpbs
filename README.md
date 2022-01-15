@@ -2,4 +2,6 @@
 
 ## First release out now!
 
-https://github.com/klonspace/mp3-128kpbs/releases/tag/first
+[Download Links](https://github.com/klonspace/mp3-128kpbs/releases/tag/first)
+
+[Info](https://klonspace.github.io/mp3-128kpbs/)
