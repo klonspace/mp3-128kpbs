@@ -1,27 +1,7 @@
-# electron-vue-downloader
+# MP3 128 kbps
 
-## Project setup
-```
-npm install
-```
+## First release out now!
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+[Download Links](https://github.com/klonspace/mp3-128kpbs/releases/tag/first)
 
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
-
-
-first release : https://we.tl/t-LgvQhQTSdu
+[Info](https://klonspace.github.io/mp3-128kpbs/)
