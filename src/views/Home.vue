@@ -165,7 +165,7 @@ export default {
 
 <style scoped lang="scss">
 .home {
-    font-family: "Thermo";
+    font-family: "XLMonoAlt";
     font-size: 38px;
     line-height: 34px;
 }
@@ -202,7 +202,7 @@ export default {
         color: black;
         width: 100%;
         box-sizing: border-box;
-        font-family: "Thermo";
+        font-family: "XLMonoAlt";
         // padding-top: 5px;
         height: 110px;
         font-size: 90px;
@@ -295,12 +295,12 @@ ul {
         font-family: Arial, Helvetica, sans-serif;
     }
     .blockContent {
-        font-family: "Thermo";
+        font-family: "XLMonoAlt";
         // border: 1px solid #ddd;
         color: black;
         margin-top: 18px;
         display: block;
-        font-size: 25px;
+        font-size: 35px;
         line-height: 23px;
     }
     .blockContent:hover {
@@ -338,7 +338,7 @@ ul {
 
 @media screen and (max-width: 485px) {
     .blockContent {
-        font-size: 25px;
+        font-size: 35px;
         line-height: 23px;
     }
 }
