@@ -57,11 +57,7 @@ async function createWindow() {
     win.loadURL('app://./index.html')
   }
   // win.webContents.openDevTools()
-  if (!preferences.get("exportFolder")) {
-    setOutputFolder(win, preferences);
-  }
-  else {
-
+  if (preferences.get("exportFolder")) {
     store.commit("setFolder", preferences.get("exportFolder"));
   }
 }
@@ -76,14 +72,9 @@ app.on('window-all-closed', () => {
 })
 
 app.on('activate', () => {
-  // On macOS it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
   if (BrowserWindow.getAllWindows().length === 0) createWindow()
 })
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
 app.on('ready', async () => {
   if (isDevelopment && !process.env.IS_TEST) {
     // Install Vue Devtools
@@ -95,9 +86,9 @@ app.on('ready', async () => {
   }
   if (process.platform === 'darwin') {
     globalShortcut.register('Command+Q', () => {
-        app.quit();
+      app.quit();
     })
-}
+  }
 
   initSC(app)
   createWindow()
@@ -128,11 +119,15 @@ ipcMain.on('songURL', (e, data) => {
   addSongToList(data)
 })
 
+ipcMain.on('setFolder', (e, data) => {
+  setOutputFolder(win, preferences);
+})
+
 function addSongToList(url) {
   checkURL(url).then(function (songInfo) {
     songInfo.id = new Date().getTime()
     songInfo.downloadProgress = 0;
-    songInfo.smoothProgress  = 0;
+    songInfo.smoothProgress = 0;
     store.commit('pushURL', songInfo)
     win.webContents.send('emptyInput')
     downloadSong(songInfo)

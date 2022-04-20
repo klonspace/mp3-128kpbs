@@ -1,15 +1,17 @@
 <template>
   <div id="app">
-    <router-view />
+    <router-view v-if="$store.state.exportFolder != ''" />
+    <intro v-else />
   </div>
 </template>
 <script>
 // In renderer process to call actions you need to use `dispatch` or `mapActions`
 // Don't use `commit` because actions fired via `commit` will not be shared between processes
-import store from '@/store/'
-
+import Intro from "@/views/Intro.vue"
 const { ipcRenderer } = window.require('electron')
+
 export default {
+  components : {Intro},
   mounted () {
     ipcRenderer.on('goToHome', () => {
       this.$router.push('/')
