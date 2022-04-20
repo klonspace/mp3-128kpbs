@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <div class="inputContainer">
-      <input type="text" id="url" @input="submitURL">
+      <input type="text" id="url" @input="submitURL" @paste="pasteURL">
       <div class="overlay" v-html="placeholder" :class="{'error' : errorWithURL, 'loading': checkingURL}"></div>
     </div>
     <!-- <input type="button" value="submit" @click="submitURL"> -->
@@ -18,7 +18,7 @@
                   <div class="blockTitle">
                     ARTIST
                   </div>
-                  <div v-html="song.artist" spellcheck="false" data-fontsize="1" contenteditable="true" data-which="artist" @blur="updateStore" @paste="specialPaste" @keydown="preventEnter" class="blockContent" />
+                  <div v-html="song.artist" spellcheck="false" data-fontsize="1" contenteditable="true" data-which="artist" @blur="updateStore"  @keydown="preventEnter" class="blockContent" />
                 </div>
                 <div class="block">
                   <div class="blockTitle">
@@ -113,12 +113,20 @@ export default {
                 song.smoothProgress += (song.downloadProgress - song.smoothProgress)/20;
             })
         },
-
+        pasteURL(e) {
+            console.log(e)
+e.preventDefault();
+            var text = e.clipboardData.getData("text/plain").replace(/\n/g, " ");
+            this.sendURL(text)
+        },
         submitURL() {
-            var url = document.getElementById("url").value;
-            document.getElementById("url").value = "";
+            this.sendURL(document.getElementById("url").value);
+            
+        },
+        sendURL(u) {
+document.getElementById("url").value = "";
             document.getElementById("url").disabled = true;
-            ipcRenderer.send("songURL", url);
+            ipcRenderer.send("songURL", u);
             this.checkingURL = true;
         },
         preventEnter(e) {

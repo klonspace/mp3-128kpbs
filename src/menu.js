@@ -6,7 +6,6 @@ const path = require('path')
 
 import store from './store'
 function setOutputFolder(win, prefs) {
-  console.log(prefs)
   dialog.showOpenDialog(win, {
     properties: ['openFile', 'openDirectory'],
     title : "Please select where you would like to save downloaded files. This can be changed later."
@@ -44,7 +43,18 @@ function createMenu(window, prefs) {
           }
         }
       ]
-    }
+    },
+    {
+      label: "Edit",
+      submenu: [
+          { label: "Undo", accelerator: "CmdOrCtrl+Z", selector: "undo:" },
+          { label: "Redo", accelerator: "Shift+CmdOrCtrl+Z", selector: "redo:" },
+          { type: "separator" },
+          { label: "Cut", accelerator: "CmdOrCtrl+X", selector: "cut:" },
+          { label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" },
+          { label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:" },
+          { label: "Select All", accelerator: "CmdOrCtrl+A", selector: "selectAll:" }
+      ]}
   ])
   Menu.setApplicationMenu(menu)
 }
